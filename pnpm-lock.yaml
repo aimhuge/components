@@ -50,6 +50,25 @@ importers:
         specifier: ^4.1.11
         version: 4.1.11(@types/node@26.6.4)(jsdom@30.1.1)(vite@8.3.2(@types/node@26.6.4))
 
+  packages/billing:
+    dependencies:
+      stripe:
+        specifier: 22.5.0
+        version: 22.5.0(@types/node@26.6.4)
+    devDependencies:
+      '@supabase/supabase-js':
+        specifier: ^2.117.2
+        version: 2.117.2
+      '@types/node':
+        specifier: ^26.6.4
+        version: 26.6.4
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.11
+        version: 4.1.11(@types/node@26.6.4)(jsdom@30.1.1)(vite@8.3.2(@types/node@26.6.4))
+
 packages:
 
   '@asamuzakjp/css-color@7.1.3':
@@ -886,6 +905,15 @@ packages:
 
   std-env@4.3.0:
     resolution: {integrity: sha512-OtU/EgQ1kIm5KwqQpBC6ZEMXrZRui11w8zgfTWp8cdO9B8OaPsbA8bTHO2P+HNo1VlUTGMVBwPhydu6poeXiag==}
+
+  stripe@22.5.0:
+    resolution: {integrity: sha512-QVwMwriC0bbySx6R4dpsvJ0W//GojC1kwWVS6rPSoVqDUIZX4Hy3TaUrd2AZeXEAaKbfWIjQjvo3vKAReHZ0vQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@types/node': '>=18'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
 
   styled-jsx@5.1.6:
     resolution: {integrity: sha512-qSVyDTeMotdvQYoHWLNGwRFJHC+i+ZvdBRYosOFgC+Wg1vx4frN2/RG/NA7SYqqvKNLf39P2LSRA2pu6n0XYZA==}
@@ -1743,6 +1771,10 @@ snapshots:
   stackback@0.0.2: {}
 
   std-env@4.3.0: {}
+
+  stripe@22.5.0(@types/node@26.6.4):
+    optionalDependencies:
+      '@types/node': 26.6.4
 
   styled-jsx@5.1.6(react@19.2.4):
     dependencies:

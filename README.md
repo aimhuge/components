@@ -5,7 +5,7 @@ Shared modules for the AimHuge apps: DeckCP, BlastCP, and whatever comes next. E
 | Package | What it is |
 |---|---|
 | [`@aimhuge/auth`](packages/auth/README.md) | Supabase sign-in: the login form, the signed-in banner, `/auth/callback` + `/auth/confirm`, session helpers |
-| `@aimhuge/billing` | Coming from the billing work |
+| [`@aimhuge/billing`](packages/billing/README.md) | Plans, subscriptions, Stripe (checkout, portal, webhook), the mock, invoices, and a metered-usage ledger |
 
 ## Installing a package in an app
 
