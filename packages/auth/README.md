@@ -6,7 +6,7 @@ Supabase sign-in for the AimHuge Next.js apps: Google OAuth and magic links, no 
 
 | Package | App |
 |---|---|
-| `LoginForm`: Google button, magic-link field, guest upgrade, desktop-shell round trip | The `/login` page itself: header, card, copy, brand |
+| `useLoginFlow`: the sign-in behaviour with no UI (guest upgrade, desktop-shell round trip, the loop guard); `LoginForm`: its default look | The `/login` page itself: header, card, copy, brand, and its own form if it wants one |
 | `SignedInPrompt`: the "already signed in as …" banner, and its sign-out action | Where a signed-in visitor goes by default (orgs, last-visited cookie, …) |
 | `createAuthCallback` / `createAuthConfirm`: the `/auth/callback` and `/auth/confirm` handlers | What to record after sign-in (`onSignedIn`: login stats, invites) |
 | `getSupabaseServer` / `getSupabaseBrowser`, `useAuth`, `readSessionIdentity` | The Proxy that refreshes the session on every request |
@@ -15,7 +15,7 @@ Supabase sign-in for the AimHuge Next.js apps: Google OAuth and magic links, no 
 ## Entry points
 
 - `@aimhuge/auth`: pure, safe anywhere. `safeNextPath`, `identityFromUser`, and the `SessionIdentity` and `DesktopAuth` types.
-- `@aimhuge/auth/client`: `"use client"` modules. `LoginForm`, `SignedInPrompt`, `useAuth`, `getSupabaseBrowser`. A Server Component may import these; it gets client references.
+- `@aimhuge/auth/client`: `"use client"` modules. `useLoginFlow`, `LoginForm`, `SignedInPrompt`, `useAuth`, `getSupabaseBrowser`. A Server Component may import these; it gets client references.
 - `@aimhuge/auth/server`: `getSupabaseServer`, `createAuthCallback`, `createAuthConfirm`, `readSessionIdentity`, and `signOutAndRedirect` (a server action).
 - `@aimhuge/auth/auth.css`: the `auth-*` colour tokens, plus the `@source` that makes Tailwind generate the components' classes.
 
@@ -84,6 +84,35 @@ Env: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
    import { useAuth as useAimhugeAuth } from "@aimhuge/auth/client";
    export const useAuth = () => useAimhugeAuth();
    ```
+
+## Your own form
+
+How headless this is: the route handlers, session helpers, sign-out action and `useAuth` render nothing. `LoginForm` and `SignedInPrompt` are a fixed layout and copy, restyled only through the `--auth-*` colours. For a different form, skip `LoginForm` and drive `useLoginFlow` directly. It takes the same options and owns all the behaviour, so a custom form can't drop the guest upgrade, the desktop round trip or the `signin=force` loop guard:
+
+```tsx
+"use client";
+import { useState } from "react";
+import { useLoginFlow } from "@aimhuge/auth/client";
+
+export function MyLoginForm() {
+  const { busy, error, sentTo, awaitingBrowser, signInWithGoogle, sendMagicLink, reset } =
+    useLoginFlow({ defaultNext: "/app" });
+  const [email, setEmail] = useState("");
+
+  if (sentTo) return <p>Check {sentTo}. <button onClick={reset}>Use another email</button></p>;
+  if (awaitingBrowser) return <p>Finish in your browser. <button onClick={reset}>Try again</button></p>;
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); void sendMagicLink(email); }}>
+      <button type="button" disabled={busy !== null} onClick={() => void signInWithGoogle()}>Google</button>
+      <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      <button disabled={busy !== null || !email}>Send link</button>
+      {error && <p role="alert">{error}</p>}
+    </form>
+  );
+}
+```
+
+`busy` is `"google"`, `"email"` or `null`. After a successful Google handoff on the web it stays `"google"` until the page leaves, so the button doesn't flick back to idle mid-redirect. Like `LoginForm`, the component must sit inside `<Suspense>` because the hook reads `useSearchParams`.
 
 ## Options that change behaviour
 

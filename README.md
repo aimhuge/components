@@ -9,26 +9,17 @@ Shared modules for the AimHuge apps: DeckCP, BlastCP, and whatever comes next. E
 
 ## Installing a package in an app
 
-Apps install straight from a git tag, over SSH, with a path into the workspace:
+Apps install straight from a git tag, with a path into the workspace:
 
 ```bash
-pnpm add "@aimhuge/auth@git+ssh://git@github.com/aimhuge/components.git#v0.1.0&path:/packages/auth"
+pnpm add "@aimhuge/auth@github:aimhuge/components#v0.1.0&path:/packages/auth"
 ```
+
+The repo is public, so this needs no key or token anywhere: not on a laptop, not on Vercel, not in CI. pnpm fetches the tag's tarball from GitHub and takes the package's directory. Keep secrets, customer data and anything unreleased out of it.
 
 Every package ships compiled `dist/` (JS + `.d.ts`), committed in the tag. So an app needs no `transpilePackages`, and its `tsc` never type-checks our source.
 
 To upgrade, change the tag in the app's `package.json` and run `pnpm install`.
-
-## Private access: one read-only deploy key
-
-The repo is private. A developer's own SSH key covers local installs. For builds, there's a **read-only deploy key on this repo only**, which can read nothing else:
-
-- **Vercel**: env var `AIMHUGE_COMPONENTS_DEPLOY_KEY` (the private key, sensitive) on each app's project, plus `"installCommand": "bash scripts/install-deps.sh"` in the app's `vercel.json`.
-- **GitHub Actions**: repo secret `AIMHUGE_COMPONENTS_DEPLOY_KEY`. The install step runs `bash scripts/install-deps.sh --frozen-lockfile` with the secret in its env.
-
-`scripts/install-deps.sh` lives in each app, because nothing can be fetched before the install. It writes the key to a temp file, pins GitHub's published host key, exports `GIT_SSH_COMMAND` for that one `pnpm install`, and does nothing extra when the variable is unset (local installs). The canonical copy is in `docs/install-deps.sh`.
-
-To rotate the key: generate a new ed25519 key, add its public half as a read-only deploy key here, replace the env var on every Vercel project and the secret on every app repo, then delete the old deploy key.
 
 ## Releasing
 
