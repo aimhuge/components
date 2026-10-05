@@ -1,0 +1,71 @@
+/*
+ * @aimhuge/auth — styles for the sign-in form and the signed-in banner.
+ *
+ * Import once from the app's global stylesheet, after Tailwind:
+ *
+ *   @import "tailwindcss";
+ *   @import "@aimhuge/auth/auth.css";
+ *
+ * That one line does two jobs: it points Tailwind at the package's compiled
+ * components (Tailwind never scans node_modules on its own, so without the
+ * @source below none of their classes would be generated), and it defines the
+ * `auth-*` colours they use.
+ *
+ * The colours fall back to the shell tokens every AimHuge app defines
+ * (--foreground, --muted, --card-bg). An app whose sign-in card sits on a
+ * different surface sets the --auth-* variables to match it, e.g. DeckCP's
+ * light "slide" card on a dark page:
+ *
+ *   :root {
+ *     --auth-ink: var(--slide-ink);
+ *     --auth-muted: var(--slide-muted);
+ *   }
+ *
+ *   --auth-ink        headings and primary text on the card
+ *   --auth-muted      labels, captions, the "or" divider text
+ *   --auth-panel      the signed-in banner's background
+ *   --auth-field      the Google button and email input (white by default,
+ *                     as Google's button guidelines expect)
+ *   --auth-field-ink  text and borders on that field
+ *
+ * The accent (bg-accent, text-accent-ink, hover:bg-accent-hover) and
+ * font-display come from the app's own theme.
+ */
+
+@source "./dist";
+
+@theme inline {
+  --color-auth-ink: var(--auth-ink, var(--foreground));
+  --color-auth-muted: var(--auth-muted, var(--muted));
+  --color-auth-panel: var(--auth-panel, var(--card-bg));
+  --color-auth-field: var(--auth-field, #ffffff);
+  --color-auth-field-ink: var(--auth-field-ink, #171717);
+}
+
+@keyframes auth-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes auth-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@utility animate-auth-fade-in {
+  animation: auth-fade-in 0.8s ease-out both;
+}
+
+@utility animate-auth-scale-in {
+  animation: auth-scale-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}

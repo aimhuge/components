@@ -1,0 +1,8 @@
+node_modules/
+*.tsbuildinfo
+.DS_Store
+coverage/
+
+# dist/ is NOT ignored: apps install these packages straight from a git tag,
+# with no build step on their side, so the compiled output has to be in the
+# tag. scripts/release.sh refuses to tag a dist/ that doesn't match src/.

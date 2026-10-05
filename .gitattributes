@@ -1,0 +1,2 @@
+# Compiled output, committed so apps can install from a tag. Collapsed in diffs.
+packages/*/dist/** linguist-generated=true

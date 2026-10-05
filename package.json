@@ -1,0 +1,12 @@
+{
+  "name": "aimhuge-components",
+  "private": true,
+  "description": "Shared modules for the AimHuge apps (DeckCP, BlastCP, …). Each package under packages/ is installed on its own, by git tag.",
+  "packageManager": "pnpm@11.25.0",
+  "scripts": {
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "release": "bash scripts/release.sh"
+  }
+}
