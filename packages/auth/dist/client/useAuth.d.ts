@@ -3,6 +3,8 @@ import type { DesktopAuth } from "../desktop.js";
 export type UseAuthOptions = {
     /** Pass a module-level constant: it is read on every call, never memoised. */
     desktop?: DesktopAuth;
+    /** The app's own Google route (`createGoogleStart`); see `LoginFlowOptions.googleSignInPath`. Web only. */
+    googleSignInPath?: string;
 };
 /**
  * The signed-in user, kept current through Supabase's auth events, plus the
@@ -11,7 +13,7 @@ export type UseAuthOptions = {
  * Apps wrap this once (`lib/hooks/useAuth.ts`) to bind their own options, so
  * call sites stay `useAuth()`.
  */
-export declare function useAuth({ desktop }?: UseAuthOptions): {
+export declare function useAuth({ desktop, googleSignInPath }?: UseAuthOptions): {
     user: User | null;
     loading: boolean;
     isGuest: boolean;

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { getSupabaseBrowser } from "./supabase-browser.js";
+import { navigateTo } from "./navigate.js";
 /**
  * The signed-in user, kept current through Supabase's auth events, plus the
  * two actions every app needs outside the sign-in page.
@@ -8,7 +9,7 @@ import { getSupabaseBrowser } from "./supabase-browser.js";
  * Apps wrap this once (`lib/hooks/useAuth.ts`) to bind their own options, so
  * call sites stay `useAuth()`.
  */
-export function useAuth({ desktop } = {}) {
+export function useAuth({ desktop, googleSignInPath } = {}) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const supabase = getSupabaseBrowser();
@@ -47,6 +48,10 @@ export function useAuth({ desktop } = {}) {
         // project must allow a wildcard (e.g. http://localhost:4001/**), or the
         // `?next=` makes the match fail.
         const query = redirectTo && redirectTo !== "/" ? `?next=${encodeURIComponent(redirectTo)}` : "";
+        if (googleSignInPath) {
+            navigateTo(`${googleSignInPath}${query}`);
+            return { error: null };
+        }
         const { error } = await supabase.auth.signInWithOAuth({
             provider: "google",
             options: { redirectTo: `${window.location.origin}/auth/callback${query}` },

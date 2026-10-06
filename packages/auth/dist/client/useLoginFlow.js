@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useSearchParams } from "next/navigation.js";
 import { getSupabaseBrowser } from "./supabase-browser.js";
+import { navigateTo } from "./navigate.js";
 const LINK_EXPIRED = "That link expired or was already used. Send a fresh one.";
 /**
  * The sign-in flow with no UI: everything `LoginForm` does, for an app that
@@ -13,7 +14,7 @@ const LINK_EXPIRED = "That link expired or was already used. Send a fresh one.";
  * identity link: sign in plainly instead of linking again). So, like anything
  * that calls useSearchParams, the component using it must sit inside <Suspense>.
  */
-export function useLoginFlow({ defaultNext, desktop, linkAnonymous = false }) {
+export function useLoginFlow({ defaultNext, desktop, linkAnonymous = false, googleSignInPath }) {
     const params = useSearchParams();
     const [sentTo, setSentTo] = useState(null);
     const [awaitingBrowser, setAwaitingBrowser] = useState(false);
@@ -74,6 +75,11 @@ export function useLoginFlow({ defaultNext, desktop, linkAnonymous = false }) {
                 // stranding them here.
                 console.warn("[login] identity linking unavailable, signing in instead:", error.message);
             }
+        }
+        // The app's own round trip. `busy` stays "google" while the page leaves.
+        if (googleSignInPath && !shell) {
+            navigateTo(`${googleSignInPath}?next=${encodeURIComponent(nextPath())}`);
+            return;
         }
         const { data, error } = await supabase.auth.signInWithOAuth({ provider: "google", options: oauthOptions(false) });
         if (error) {

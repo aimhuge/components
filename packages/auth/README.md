@@ -16,7 +16,7 @@ Supabase sign-in for the AimHuge Next.js apps: Google OAuth and magic links, no 
 
 - `@aimhuge/auth`: pure, safe anywhere. `safeNextPath`, `identityFromUser`, and the `SessionIdentity` and `DesktopAuth` types.
 - `@aimhuge/auth/client`: `"use client"` modules. `useLoginFlow`, `LoginForm`, `SignedInPrompt`, `useAuth`, `getSupabaseBrowser`. A Server Component may import these; it gets client references.
-- `@aimhuge/auth/server`: `getSupabaseServer`, `createAuthCallback`, `createAuthConfirm`, `readSessionIdentity`, and `signOutAndRedirect` (a server action).
+- `@aimhuge/auth/server`: `getSupabaseServer`, `createAuthCallback`, `createAuthConfirm`, `createGoogleStart` + `createGoogleCallback` (Google on your own domain, below), `readSessionIdentity`, and `signOutAndRedirect` (a server action).
 - `@aimhuge/auth/auth.css`: the `auth-*` colour tokens, plus the `@source` that makes Tailwind generate the components' classes.
 
 ## Wiring an app
@@ -118,6 +118,36 @@ export function MyLoginForm() {
 
 - **`linkAnonymous`** (LoginForm). For apps that hand out anonymous guest sessions before sign-in. Google is linked onto the guest's account instead of replacing it, so whatever they made stays theirs. A refused link (that Google account already belongs to someone) comes back through `/auth/callback` as `signin=force`, and the form then signs in plainly. The retry can't loop.
 - **`desktop: DesktopAuth`** (LoginForm, `useAuth`). For an app with an Electron shell. Google refuses OAuth inside an embedded webview, so in the shell the authorize URL opens in the system browser (`skipBrowserRedirect` + `openExternal`) and every redirect target becomes `desktop.redirectTo(next)`, a page that hands the round trip back to the app. `isDesktop()` is read at click time only, never during render, because the server render has no `window`.
+
+## Google on your own domain
+
+Supabase's hosted Google flow sends Google back to `<ref>.supabase.co/auth/v1/callback`, so that host must be an **authorized domain** on the Google Cloud project. That's harmless until the same project asks for sensitive scopes (YouTube, Gmail): verification wants you to own every authorized domain, and you don't own `supabase.co`. Supabase's fix is a paid custom domain. This one is free: Google returns to the app, the app trades the code for Google's ID token, and hands that to Supabase with `signInWithIdToken`. Supabase never talks to Google.
+
+Existing users are unaffected: both flows key the Supabase identity on Google's `sub`, which is one per Google account whichever OAuth client asked.
+
+1. **Routes.**
+
+   ```ts
+   // app/auth/google/route.ts
+   import { createGoogleStart } from "@aimhuge/auth/server";
+   export const GET = createGoogleStart({ defaultNext: "/app" });
+
+   // app/auth/google/callback/route.ts
+   import { createGoogleCallback } from "@aimhuge/auth/server";
+   export const GET = createGoogleCallback({ defaultNext: "/app", onSignedIn });
+   ```
+
+   Keep `/auth/callback`: magic links still land there, and so does the hosted flow when it runs (below).
+
+2. **The button.** Pass `googleSignInPath: "/auth/google"` to `LoginForm` / `useLoginFlow` and to `useAuth`. Web only: in a desktop shell, and when `linkAnonymous` upgrades a guest, the hosted flow still runs, so an app using either keeps `supabase.co` registered.
+
+3. **Env.** `GOOGLE_SIGNIN_CLIENT_ID` and `GOOGLE_SIGNIN_CLIENT_SECRET`, server-only. Until both are set, `/auth/google` runs the hosted flow instead, so step 2 can ship before step 4.
+
+4. **Google Cloud.** Use the OAuth client Supabase's Google provider already has (its client ID is already the one Supabase accepts tokens for); add a client secret for the app if you can't read the existing one. Add `https://<app>/auth/google/callback` and `http://localhost:<port>/auth/google/callback` to its redirect URIs. A different client works too, as long as its client ID is listed under Supabase → Authentication → Providers → Google, or Supabase refuses the token (`reason=session`, "Unacceptable audience").
+
+5. **Once sign-in works through it**, remove the `supabase.co` redirect URI from the client and `supabase.co` from the project's authorized domains.
+
+The flow: `state` (CSRF) and a PKCE verifier ride an httpOnly cookie scoped to `/auth/google`; Google sees only `state` and the verifier's hash. Failures go to `/login?error=link&reason=…`: `provider`, `state` (no cookie, or a different one: another browser, or over ten minutes), `nocode`, `config`, `exchange` (Google refused the code), `session` (Supabase refused the token). A cancel on Google's screen goes back to the form with no error.
 
 ## Gotchas
 

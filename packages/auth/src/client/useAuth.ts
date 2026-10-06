@@ -4,10 +4,13 @@ import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import type { DesktopAuth } from "../desktop.js";
 import { getSupabaseBrowser } from "./supabase-browser.js";
+import { navigateTo } from "./navigate.js";
 
 export type UseAuthOptions = {
   /** Pass a module-level constant: it is read on every call, never memoised. */
   desktop?: DesktopAuth;
+  /** The app's own Google route (`createGoogleStart`); see `LoginFlowOptions.googleSignInPath`. Web only. */
+  googleSignInPath?: string;
 };
 
 /**
@@ -17,7 +20,7 @@ export type UseAuthOptions = {
  * Apps wrap this once (`lib/hooks/useAuth.ts`) to bind their own options, so
  * call sites stay `useAuth()`.
  */
-export function useAuth({ desktop }: UseAuthOptions = {}) {
+export function useAuth({ desktop, googleSignInPath }: UseAuthOptions = {}) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const supabase = getSupabaseBrowser();
@@ -62,6 +65,10 @@ export function useAuth({ desktop }: UseAuthOptions = {}) {
     // project must allow a wildcard (e.g. http://localhost:4001/**), or the
     // `?next=` makes the match fail.
     const query = redirectTo && redirectTo !== "/" ? `?next=${encodeURIComponent(redirectTo)}` : "";
+    if (googleSignInPath) {
+      navigateTo(`${googleSignInPath}${query}`);
+      return { error: null };
+    }
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo: `${window.location.origin}/auth/callback${query}` },

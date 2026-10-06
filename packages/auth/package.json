@@ -1,6 +1,6 @@
 {
   "name": "@aimhuge/auth",
-  "version": "0.1.0",
+  "version": "0.4.0",
   "description": "Supabase sign-in for the AimHuge Next.js apps: the login form, the signed-in banner, the /auth/callback and /auth/confirm handlers, and the session helpers.",
   "type": "module",
   "sideEffects": [

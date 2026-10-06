@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation.js";
 import type { DesktopAuth } from "../desktop.js";
 import { getSupabaseBrowser } from "./supabase-browser.js";
+import { navigateTo } from "./navigate.js";
 
 const LINK_EXPIRED = "That link expired or was already used. Send a fresh one.";
 
@@ -18,6 +19,14 @@ export type LoginFlowOptions = {
    * theirs. For apps that hand out guest sessions before sign-in.
    */
   linkAnonymous?: boolean;
+  /**
+   * The app's own Google route (`createGoogleStart`), e.g. "/auth/google".
+   * Set, the Google button goes there instead of Supabase's hosted flow, so
+   * Google returns to this domain and `supabase.co` needn't be an authorized
+   * domain on the Google project. Web only: in a desktop shell, and when a
+   * guest is upgraded (`linkAnonymous`), the hosted flow still runs.
+   */
+  googleSignInPath?: string;
 };
 
 export type LoginFlow = {
@@ -50,7 +59,7 @@ export type LoginFlow = {
  * identity link: sign in plainly instead of linking again). So, like anything
  * that calls useSearchParams, the component using it must sit inside <Suspense>.
  */
-export function useLoginFlow({ defaultNext, desktop, linkAnonymous = false }: LoginFlowOptions): LoginFlow {
+export function useLoginFlow({ defaultNext, desktop, linkAnonymous = false, googleSignInPath }: LoginFlowOptions): LoginFlow {
   const params = useSearchParams();
   const [sentTo, setSentTo] = useState<string | null>(null);
   const [awaitingBrowser, setAwaitingBrowser] = useState(false);
@@ -119,6 +128,12 @@ export function useLoginFlow({ defaultNext, desktop, linkAnonymous = false }: Lo
         // stranding them here.
         console.warn("[login] identity linking unavailable, signing in instead:", error.message);
       }
+    }
+
+    // The app's own round trip. `busy` stays "google" while the page leaves.
+    if (googleSignInPath && !shell) {
+      navigateTo(`${googleSignInPath}?next=${encodeURIComponent(nextPath())}`);
+      return;
     }
 
     const { data, error } = await supabase.auth.signInWithOAuth({ provider: "google", options: oauthOptions(false) });

@@ -10,6 +10,14 @@ export type LoginFlowOptions = {
      * theirs. For apps that hand out guest sessions before sign-in.
      */
     linkAnonymous?: boolean;
+    /**
+     * The app's own Google route (`createGoogleStart`), e.g. "/auth/google".
+     * Set, the Google button goes there instead of Supabase's hosted flow, so
+     * Google returns to this domain and `supabase.co` needn't be an authorized
+     * domain on the Google project. Web only: in a desktop shell, and when a
+     * guest is upgraded (`linkAnonymous`), the hosted flow still runs.
+     */
+    googleSignInPath?: string;
 };
 export type LoginFlow = {
     /** Which action is in flight. One per action, so a magic link doesn't spin the Google button. */
@@ -40,4 +48,4 @@ export type LoginFlow = {
  * identity link: sign in plainly instead of linking again). So, like anything
  * that calls useSearchParams, the component using it must sit inside <Suspense>.
  */
-export declare function useLoginFlow({ defaultNext, desktop, linkAnonymous }: LoginFlowOptions): LoginFlow;
+export declare function useLoginFlow({ defaultNext, desktop, linkAnonymous, googleSignInPath }: LoginFlowOptions): LoginFlow;
