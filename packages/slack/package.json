@@ -1,0 +1,37 @@
+{
+  "name": "@aimhuge/slack",
+  "version": "0.2.0",
+  "description": "The Slack plumbing the AimHuge apps share: the Web API client, request verification, the Add-to-Slack install, signed account links, sending to a person or a channel, Events API and button plumbing, incoming webhooks, and a model-agnostic agent loop — plus the SQL it needs.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./server": {
+      "types": "./dist/server/index.d.ts",
+      "default": "./dist/server/index.js"
+    },
+    "./sql/*": "./sql/*"
+  },
+  "files": [
+    "dist",
+    "sql",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "@supabase/supabase-js": "^2.0.0"
+  },
+  "devDependencies": {
+    "@supabase/supabase-js": "^2.117.2",
+    "@types/node": "^26.6.4",
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.11"
+  }
+}
