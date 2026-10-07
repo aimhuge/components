@@ -21,6 +21,7 @@ export { rollsOnRead } from "./store.js";
 export { INVOICE_HISTORY_LIMIT } from "./account.js";
 export type { SetPlanResult } from "./comp.js";
 export type { GrantInput, UsageInput } from "./ledger.js";
+export type { BillingProfileInput } from "./profile.js";
 export { STRIPE_API_VERSION, isTestKey, priceEnvName, type StripeConfig, type StripeHandle } from "./stripe/client.js";
 export {
   fromUnix,

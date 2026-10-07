@@ -2,6 +2,7 @@ import { getAccount } from "./account.js";
 import { setPlanByAdmin } from "./comp.js";
 import { assertCanAfford, getBalance, grantCredit, recordUsage } from "./ledger.js";
 import { createMockProvider } from "./mock.js";
+import { getInvoice, getProfile, saveProfile } from "./profile.js";
 import { createRuntime } from "./runtime.js";
 import { ensureSubscription, logBillingEvent, saveSubscription } from "./store.js";
 import { createStripeHandle } from "./stripe/client.js";
@@ -21,6 +22,9 @@ export function createBilling(config) {
         subscription: (service, orgId) => ensureSubscription(rt, service, orgId),
         saveSubscription: (service, orgId, patch) => saveSubscription(rt, service, orgId, patch),
         account: (service, orgId) => getAccount(rt, service, orgId),
+        invoice: (service, orgId, number) => getInvoice(service, orgId, number),
+        profile: (service, orgId) => getProfile(service, orgId),
+        saveProfile: (service, orgId, input, actorEmail) => saveProfile(service, orgId, input, actorEmail),
         logEvent: (service, orgId, kind, actorEmail, payload) => logBillingEvent(service, orgId, kind, actorEmail, payload),
         setPlanByAdmin: (service, input) => setPlanByAdmin(rt, service, input),
         balance: (service, orgId, meter) => getBalance(rt, service, orgId, meter),

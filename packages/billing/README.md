@@ -112,6 +112,23 @@ A missing variable throws on first use with the whole list. Create the Stripe
 prices to MATCH the catalog (per-unit recurring prices, seats ride on
 `quantity`). Nothing reconciles them, so a mismatch is a real bug.
 
+## What `billing` gives an app
+
+Every method takes the service-role client first; the app's own gate runs
+before it.
+
+| | |
+|---|---|
+| `provider()` | The active provider: checkout, plan change, cancel/resume, cards, portal, `reconcile` |
+| `subscription(svc, org)` | Created Free on first read; a lapsed free/comped period rolls forward |
+| `account(svc, org)` | Subscription, invoices (24), cards, billing profile, member count, owner email |
+| `invoice(svc, org, number)` | One receipt by its human number, org-scoped (`null` if not theirs) |
+| `profile` / `saveProfile` | The invoice addressee; `saveProfile` validates email + country (a `BillingError` the customer can read) and trims |
+| `setPlanByAdmin(svc, …)` | An operator's comp; refuses a live Stripe subscription |
+| `balance` / `assertCanAfford` / `recordUsage` / `grantCredit` | The usage ledger |
+| `handleStripeWebhook(req, getService)` | The webhook as a Fetch handler |
+| `saveSubscription`, `logEvent` | Low-level; providers and comps use them |
+
 ## One Stripe account, many apps
 
 Every customer, Checkout session and subscription is stamped with

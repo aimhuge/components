@@ -14,12 +14,13 @@
  * authorization gate in front of every call.
  */
 import type { BasePlan } from "../catalog.js";
-import type { BillingAccount } from "../types.js";
+import type { BillingAccount, BillingProfile, Invoice } from "../types.js";
 import type { MeterBalance } from "../usage.js";
 import { getAccount } from "./account.js";
 import { setPlanByAdmin, type SetPlanResult } from "./comp.js";
 import { assertCanAfford, getBalance, grantCredit, recordUsage, type GrantInput, type UsageInput } from "./ledger.js";
 import { createMockProvider } from "./mock.js";
+import { getInvoice, getProfile, saveProfile, type BillingProfileInput } from "./profile.js";
 import type { BillingProvider } from "./provider.js";
 import { createRuntime, type BillingConfig, type Runtime, type Service } from "./runtime.js";
 import { ensureSubscription, logBillingEvent, saveSubscription, type SubscriptionPatch } from "./store.js";
@@ -43,6 +44,12 @@ export interface Billing<P extends string, T extends BasePlan<P>> {
   saveSubscription(service: Service, orgId: string, patch: SubscriptionPatch<P>): Promise<Subscription<P>>;
   /** Subscription, invoices, cards, billing profile, member count, owner email. */
   account(service: Service, orgId: string): Promise<BillingAccount<P>>;
+  /** One invoice by its human number ("DCP-2026-0001"), or null — org-scoped. */
+  invoice(service: Service, orgId: string, number: string): Promise<Invoice | null>;
+  /** The invoice addressee. */
+  profile(service: Service, orgId: string): Promise<BillingProfile>;
+  /** Validate (BillingError on a bad email/country), trim and save the addressee. */
+  saveProfile(service: Service, orgId: string, input: BillingProfileInput, actorEmail: string | null): Promise<BillingProfile>;
   logEvent(
     service: Service,
     orgId: string,
@@ -86,6 +93,9 @@ export function createBilling<P extends string, T extends BasePlan<P>>(config: B
     subscription: (service, orgId) => ensureSubscription(rt, service, orgId),
     saveSubscription: (service, orgId, patch) => saveSubscription(rt, service, orgId, patch),
     account: (service, orgId) => getAccount(rt, service, orgId),
+    invoice: (service, orgId, number) => getInvoice(service, orgId, number),
+    profile: (service, orgId) => getProfile(service, orgId),
+    saveProfile: (service, orgId, input, actorEmail) => saveProfile(service, orgId, input, actorEmail),
     logEvent: (service, orgId, kind, actorEmail, payload) => logBillingEvent(service, orgId, kind, actorEmail, payload),
     setPlanByAdmin: (service, input) => setPlanByAdmin(rt, service, input),
     balance: (service, orgId, meter) => getBalance(rt, service, orgId, meter),

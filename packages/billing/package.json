@@ -1,6 +1,6 @@
 {
   "name": "@aimhuge/billing",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Plans, subscriptions, Stripe, invoices and a metered-usage ledger for the AimHuge apps: the provider seam, the Stripe adapter and webhook, the mock, the Supabase mirror, and the SQL it needs.",
   "type": "module",
   "sideEffects": false,

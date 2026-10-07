@@ -14,10 +14,11 @@
  * authorization gate in front of every call.
  */
 import type { BasePlan } from "../catalog.js";
-import type { BillingAccount } from "../types.js";
+import type { BillingAccount, BillingProfile, Invoice } from "../types.js";
 import type { MeterBalance } from "../usage.js";
 import { type SetPlanResult } from "./comp.js";
 import { type GrantInput, type UsageInput } from "./ledger.js";
+import { type BillingProfileInput } from "./profile.js";
 import type { BillingProvider } from "./provider.js";
 import { type BillingConfig, type Runtime, type Service } from "./runtime.js";
 import { type SubscriptionPatch } from "./store.js";
@@ -37,6 +38,12 @@ export interface Billing<P extends string, T extends BasePlan<P>> {
     saveSubscription(service: Service, orgId: string, patch: SubscriptionPatch<P>): Promise<Subscription<P>>;
     /** Subscription, invoices, cards, billing profile, member count, owner email. */
     account(service: Service, orgId: string): Promise<BillingAccount<P>>;
+    /** One invoice by its human number ("DCP-2026-0001"), or null — org-scoped. */
+    invoice(service: Service, orgId: string, number: string): Promise<Invoice | null>;
+    /** The invoice addressee. */
+    profile(service: Service, orgId: string): Promise<BillingProfile>;
+    /** Validate (BillingError on a bad email/country), trim and save the addressee. */
+    saveProfile(service: Service, orgId: string, input: BillingProfileInput, actorEmail: string | null): Promise<BillingProfile>;
     logEvent(service: Service, orgId: string, kind: string, actorEmail: string | null, payload?: Record<string, unknown>): Promise<void>;
     /** An operator moving a tier by hand. Refuses a live Stripe subscription. */
     setPlanByAdmin(service: Service, input: {
