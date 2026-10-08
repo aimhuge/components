@@ -7,6 +7,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { BasePlan, Catalog } from "../catalog.js";
 import type { BillingProviderId, SubscriptionStatus } from "../types.js";
+import { assertCheckoutBranding, type CheckoutBranding } from "./branding.js";
 
 /** The service-role client. Every billing table is RLS-locked with no
  *  policies; only this client reaches them, after the app's own gate. */
@@ -53,6 +54,8 @@ export interface BillingConfig<P extends string, T extends BasePlan<P>> {
   provider?: BillingProviderId;
   /** Origin for Stripe return URLs. Default: `NEXT_PUBLIC_SITE_URL`. */
   siteOrigin?: string;
+  /** This app's look on Stripe Checkout (`./branding.ts`). Default: the account's dashboard branding. */
+  checkoutBranding?: CheckoutBranding;
   /** Environment source. Default `process.env`. Tests pass their own. */
   env?: Record<string, string | undefined>;
 }
@@ -66,6 +69,7 @@ export interface Runtime<P extends string = string, T extends BasePlan<P> = Base
   readonly meteredStatuses: readonly SubscriptionStatus[];
   readonly env: Record<string, string | undefined>;
   readonly providerId: BillingProviderId;
+  readonly checkoutBranding: CheckoutBranding | undefined;
   mockCheckoutPath(orgSlug: string): string;
   siteOrigin(): string;
   notifyPlanChange(event: PlanChangeEvent<P>): Promise<void>;
@@ -83,6 +87,7 @@ export function createRuntime<P extends string, T extends BasePlan<P>>(
   if (!PREFIX.test(config.invoicePrefix)) {
     throw new Error(`billing: invoicePrefix "${config.invoicePrefix}" must be 2–5 capital letters`);
   }
+  if (config.checkoutBranding) assertCheckoutBranding(config.checkoutBranding);
   const env = config.env ?? process.env;
   const configured = (config.provider ?? env.BILLING_PROVIDER ?? "mock").toLowerCase();
 
@@ -98,6 +103,7 @@ export function createRuntime<P extends string, T extends BasePlan<P>>(
     // every developer's machine and CI, and the mock says loudly that it moves
     // no money. Selecting Stripe with missing config throws at first use.
     providerId: configured === "stripe" ? "stripe" : "mock",
+    checkoutBranding: config.checkoutBranding,
     mockCheckoutPath: config.mockCheckoutPath ?? ((slug) => `/${slug}/billing/checkout`),
     siteOrigin: () =>
       (config.siteOrigin ?? env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, ""),

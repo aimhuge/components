@@ -138,6 +138,25 @@ BlastCP's prices would be unknown to DeckCP's webhook, and every BlastCP event
 would 500 there and be retried for three days. Give each app its own webhook
 endpoint (and so its own `STRIPE_WEBHOOK_SECRET`).
 
+**Branding.** The account's dashboard branding is the company's. An app that
+wants Checkout to show its own name and logo passes `checkoutBranding` to
+`createBilling`; every Checkout session it opens overrides the dashboard with
+it (Stripe's `branding_settings`). The package carries no brand — each app
+passes its own, and one that passes nothing gets the dashboard's:
+
+```ts
+createBilling({
+  app: "deckcp", displayName: "DeckCP", catalog, invoicePrefix: "DCP",
+  checkoutBranding: { displayName: "DeckCP", logoUrl: "https://deckcp.com/logo.png", buttonColor: "#4f46e5" },
+});
+```
+
+A bad value (a logo AND an icon, a non-https URL, a non-hex color) throws when
+billing is created, not at someone's Checkout. Only Checkout can be branded per
+app: receipts, invoice emails, the customer portal and the card statement carry
+the account's branding. An app that needs those to be its own needs its own
+Stripe account (one organization can hold several).
+
 ## Rules that are easy to break
 
 - **Money is integers.** Cents for everything Stripe charges (prices,

@@ -6,6 +6,7 @@
  */
 import "server-only";
 export { createBilling } from "./create.js";
+export { assertCheckoutBranding, stripeBrandingSettings } from "./branding.js";
 export { rollsOnRead } from "./store.js";
 export { INVOICE_HISTORY_LIMIT } from "./account.js";
 export { STRIPE_API_VERSION, isTestKey, priceEnvName } from "./stripe/client.js";

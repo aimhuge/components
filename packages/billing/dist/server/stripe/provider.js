@@ -1,5 +1,6 @@
 import { BillingError } from "../../errors.js";
 import { clampSeats } from "../../period.js";
+import { stripeBrandingSettings } from "../branding.js";
 import { ensureSubscription, loadSubscription } from "../store.js";
 import { isTestKey } from "./client.js";
 import { ensureCustomer, guarded, stamp, stripePaymentMethodId } from "./customer.js";
@@ -109,6 +110,8 @@ export function createStripeProvider(env) {
                 allow_promotion_codes: true,
                 billing_address_collection: "auto",
                 payment_method_collection: "always",
+                // This app's name and logo over the shared account's (../branding.ts).
+                ...(rt.checkoutBranding && { branding_settings: stripeBrandingSettings(rt.checkoutBranding) }),
             }, 
             // A double click within Stripe's idempotency window reuses the session.
             { idempotencyKey: `checkout:${rt.app}:${ctx.orgId}:${input.plan}:${input.interval}:${seats}` }));

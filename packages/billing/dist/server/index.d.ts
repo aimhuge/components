@@ -7,6 +7,7 @@
 import "server-only";
 export { createBilling, type Billing } from "./create.js";
 export type { BillingConfig, PlanChangeEvent, Runtime, Service } from "./runtime.js";
+export { assertCheckoutBranding, stripeBrandingSettings, type CheckoutBranding } from "./branding.js";
 export type { AttachPaymentMethodInput, BillingContext, BillingProvider, ChangePlanInput, CheckoutInput, CheckoutResult, } from "./provider.js";
 export type { SubscriptionPatch, IssueInvoiceInput } from "./store.js";
 export { rollsOnRead } from "./store.js";

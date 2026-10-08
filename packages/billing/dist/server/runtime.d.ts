@@ -7,6 +7,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { BasePlan, Catalog } from "../catalog.js";
 import type { BillingProviderId, SubscriptionStatus } from "../types.js";
+import { type CheckoutBranding } from "./branding.js";
 /** The service-role client. Every billing table is RLS-locked with no
  *  policies; only this client reaches them, after the app's own gate. */
 export type Service = SupabaseClient;
@@ -50,6 +51,8 @@ export interface BillingConfig<P extends string, T extends BasePlan<P>> {
     provider?: BillingProviderId;
     /** Origin for Stripe return URLs. Default: `NEXT_PUBLIC_SITE_URL`. */
     siteOrigin?: string;
+    /** This app's look on Stripe Checkout (`./branding.ts`). Default: the account's dashboard branding. */
+    checkoutBranding?: CheckoutBranding;
     /** Environment source. Default `process.env`. Tests pass their own. */
     env?: Record<string, string | undefined>;
 }
@@ -62,6 +65,7 @@ export interface Runtime<P extends string = string, T extends BasePlan<P> = Base
     readonly meteredStatuses: readonly SubscriptionStatus[];
     readonly env: Record<string, string | undefined>;
     readonly providerId: BillingProviderId;
+    readonly checkoutBranding: CheckoutBranding | undefined;
     mockCheckoutPath(orgSlug: string): string;
     siteOrigin(): string;
     notifyPlanChange(event: PlanChangeEvent<P>): Promise<void>;

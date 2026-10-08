@@ -1,3 +1,4 @@
+import { assertCheckoutBranding } from "./branding.js";
 const APP_SLUG = /^[a-z0-9][a-z0-9-]{0,30}$/;
 const PREFIX = /^[A-Z]{2,5}$/;
 export function createRuntime(config) {
@@ -7,6 +8,8 @@ export function createRuntime(config) {
     if (!PREFIX.test(config.invoicePrefix)) {
         throw new Error(`billing: invoicePrefix "${config.invoicePrefix}" must be 2–5 capital letters`);
     }
+    if (config.checkoutBranding)
+        assertCheckoutBranding(config.checkoutBranding);
     const env = config.env ?? process.env;
     const configured = (config.provider ?? env.BILLING_PROVIDER ?? "mock").toLowerCase();
     return {
@@ -21,6 +24,7 @@ export function createRuntime(config) {
         // every developer's machine and CI, and the mock says loudly that it moves
         // no money. Selecting Stripe with missing config throws at first use.
         providerId: configured === "stripe" ? "stripe" : "mock",
+        checkoutBranding: config.checkoutBranding,
         mockCheckoutPath: config.mockCheckoutPath ?? ((slug) => `/${slug}/billing/checkout`),
         siteOrigin: () => (config.siteOrigin ?? env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, ""),
         async notifyPlanChange(event) {

@@ -12,6 +12,7 @@ import type { BasePlan } from "../../catalog.js";
 import { BillingError } from "../../errors.js";
 import { clampSeats } from "../../period.js";
 import type { PaymentMethod, Subscription } from "../../types.js";
+import { stripeBrandingSettings } from "../branding.js";
 import type { BillingContext, BillingProvider, ChangePlanInput } from "../provider.js";
 import { ensureSubscription, loadSubscription } from "../store.js";
 import { isTestKey } from "./client.js";
@@ -133,6 +134,8 @@ export function createStripeProvider<P extends string, T extends BasePlan<P>>(
             allow_promotion_codes: true,
             billing_address_collection: "auto",
             payment_method_collection: "always",
+            // This app's name and logo over the shared account's (../branding.ts).
+            ...(rt.checkoutBranding && { branding_settings: stripeBrandingSettings(rt.checkoutBranding) }),
           },
           // A double click within Stripe's idempotency window reuses the session.
           { idempotencyKey: `checkout:${rt.app}:${ctx.orgId}:${input.plan}:${input.interval}:${seats}` },
