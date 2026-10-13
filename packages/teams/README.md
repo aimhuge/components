@@ -77,6 +77,13 @@ a fork per app.
    });
    ```
 
+   **Client components import `@aimhuge/teams/roles`, never the root.** The
+   root re-exports the gate (`next/headers`, `"use cache"`), and a
+   `"use client"` file that imports it fails `next build`. `/roles` holds
+   the pure pieces: `ORG_ROLES`, `roleLabel`, `assignableRoles`, `roleCan`,
+   `slugify`, the email helpers and the types. `/client` and `/server` are
+   the two halves of the root, for apps that want to say which they mean.
+
 6. **The page.** Server Component, calls the gate:
    ```tsx
    // app/[orgSlug]/team/page.tsx
