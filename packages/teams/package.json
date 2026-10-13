@@ -1,6 +1,6 @@
 {
   "name": "@aimhuge/teams",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Workspace teams for the AimHuge Next.js apps: the org gate, org members and roles, the email-invite flow, the Team page UI, and the SQL schema behind all of it.",
   "type": "module",
   "sideEffects": false,
@@ -8,6 +8,18 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./roles": {
+      "types": "./dist/roles.d.ts",
+      "default": "./dist/roles.js"
+    },
+    "./client": {
+      "types": "./dist/client/index.d.ts",
+      "default": "./dist/client/index.js"
+    },
+    "./server": {
+      "types": "./dist/server/index.d.ts",
+      "default": "./dist/server/index.js"
     }
   },
   "files": [
@@ -42,4 +54,3 @@
     "vitest": "^4.1.11"
   }
 }
-
