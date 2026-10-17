@@ -6,6 +6,7 @@ Shared modules for the AimHuge apps: DeckCP, BlastCP, and whatever comes next. E
 |---|---|
 | [`@aimhuge/auth`](packages/auth/README.md) | Supabase sign-in: the login form, the signed-in banner, `/auth/callback` + `/auth/confirm`, session helpers |
 | [`@aimhuge/billing`](packages/billing/README.md) | Plans, subscriptions, Stripe (checkout, portal, webhook), the mock, invoices, and a metered-usage ledger |
+| [`@aimhuge/share`](packages/share/README.md) | Share links: access modes and the Share dialog's three questions, the email/password gate's signed pass cookie, password hashing, and the dialog and gate UI |
 | [`@aimhuge/slack`](packages/slack/README.md) | Slack: the Web API client, request verification, Add to Slack, account links, sending, Events API and buttons, incoming webhooks, toggles, and an agent loop |
 
 ## Installing a package in an app

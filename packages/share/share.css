@@ -1,0 +1,54 @@
+/*
+ * @aimhuge/share — styles for the Share dialog and the unlock gate.
+ *
+ * Import once from the app's global stylesheet, after Tailwind:
+ *
+ *   @import "tailwindcss";
+ *   @import "@aimhuge/share/share.css";
+ *
+ * That one line points Tailwind at the package's compiled components (Tailwind
+ * never scans node_modules on its own) and defines the `share-*` colours they
+ * use. The defaults are DeckCP's dark dialog; an app on another surface sets
+ * the --share-* variables to match it:
+ *
+ *   --share-ink        headings and primary text
+ *   --share-soft       button and row text
+ *   --share-dim        the gate's prompt text
+ *   --share-muted      captions, section labels, idle icons
+ *   --share-faint      placeholders and disabled rows
+ *   --share-line       hairlines and field borders
+ *   --share-line-strong  button borders
+ *   --share-surface    the dialog panel
+ *   --share-stage      the full-page gate background
+ *   --share-card       the gate's form card
+ *   --share-field      inputs and selects
+ *   --share-hover      row and button hover
+ *   --share-scrim      the backdrop behind the dialog
+ *   --share-on-accent  text on accent buttons
+ *   --share-ok / --share-warn / --share-danger
+ *
+ * The accent (bg-accent, text-accent, border-accent) comes from the app's own
+ * theme, as in @aimhuge/auth.
+ */
+
+@source "./dist";
+
+@theme inline {
+  --color-share-ink: var(--share-ink, #ffffff);
+  --color-share-soft: var(--share-soft, #cbd5e1);
+  --color-share-dim: var(--share-dim, #94a3b8);
+  --color-share-muted: var(--share-muted, #64748b);
+  --color-share-faint: var(--share-faint, #475569);
+  --color-share-line: var(--share-line, rgb(255 255 255 / 0.1));
+  --color-share-line-strong: var(--share-line-strong, rgb(255 255 255 / 0.15));
+  --color-share-surface: var(--share-surface, #0b0b12);
+  --color-share-stage: var(--share-stage, #08080a);
+  --color-share-card: var(--share-card, rgb(255 255 255 / 0.02));
+  --color-share-field: var(--share-field, rgb(0 0 0 / 0.4));
+  --color-share-hover: var(--share-hover, rgb(255 255 255 / 0.05));
+  --color-share-scrim: var(--share-scrim, rgb(0 0 0 / 0.6));
+  --color-share-on-accent: var(--share-on-accent, #ffffff);
+  --color-share-ok: var(--share-ok, #34d399);
+  --color-share-warn: var(--share-warn, rgb(251 191 36 / 0.8));
+  --color-share-danger: var(--share-danger, #f87171);
+}

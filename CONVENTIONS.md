@@ -10,6 +10,7 @@ per-package READMEs are the deep reference, and this page doesn't restate them.
 | `@aimhuge/teams` | Supabase service-role + SQL | [packages/teams/README.md](packages/teams/README.md) |
 | `@aimhuge/billing` | Stripe / payments adapter | [packages/billing/README.md](packages/billing/README.md) |
 | `@aimhuge/slack` | Web API client | [packages/slack/README.md](packages/slack/README.md) |
+| `@aimhuge/share` | Pure types + utilities, UI over them, a small server entry | [packages/share/README.md](packages/share/README.md) |
 | `@aimhuge/admin` | UI chrome over `@aimhuge/teams` (see [the exception](#1-peerdependencies-only)) | [packages/admin/README.md](packages/admin/README.md) |
 
 ## The five patterns
