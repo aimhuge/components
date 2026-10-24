@@ -22,7 +22,7 @@ export function createStripeProvider(env) {
             await syncSubscriptionCanceled(env, ctx.service, ctx.orgId, ctx.actorEmail);
             return loadSubscription(rt, ctx.service, ctx.orgId);
         }
-        const price = priceIdFor(stripe.config(), input.plan, input.interval);
+        const price = priceIdFor(stripe.config(), input.plan, input.interval, input.priceVariant);
         if (!price)
             throw new BillingError("That plan isn't available right now.");
         // No subscription to modify: Checkout has to collect a payment method.
@@ -87,7 +87,7 @@ export function createStripeProvider(env) {
             if (current.providerSubscriptionId && current.status !== "canceled") {
                 return { kind: "applied", subscription: await changePlan(ctx, input) };
             }
-            const price = priceIdFor(stripe.config(), input.plan, input.interval);
+            const price = priceIdFor(stripe.config(), input.plan, input.interval, input.priceVariant);
             if (!price)
                 throw new BillingError("That plan isn't available for purchase right now.");
             const seats = clampSeats(input.seats);
@@ -114,7 +114,9 @@ export function createStripeProvider(env) {
                 ...(rt.checkoutBranding && { branding_settings: stripeBrandingSettings(rt.checkoutBranding) }),
             }, 
             // A double click within Stripe's idempotency window reuses the session.
-            { idempotencyKey: `checkout:${rt.app}:${ctx.orgId}:${input.plan}:${input.interval}:${seats}` }));
+            {
+                idempotencyKey: `checkout:${rt.app}:${ctx.orgId}:${input.plan}:${input.interval}:${input.priceVariant ?? ""}:${seats}`,
+            }));
             if (!session.url)
                 throw new BillingError("Stripe didn't return a checkout page. Try again.");
             return { kind: "redirect", url: session.url };

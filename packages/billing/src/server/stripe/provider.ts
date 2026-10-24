@@ -42,7 +42,7 @@ export function createStripeProvider<P extends string, T extends BasePlan<P>>(
       return loadSubscription(rt, ctx.service, ctx.orgId);
     }
 
-    const price = priceIdFor(stripe.config(), input.plan, input.interval);
+    const price = priceIdFor(stripe.config(), input.plan, input.interval, input.priceVariant);
     if (!price) throw new BillingError("That plan isn't available right now.");
     // No subscription to modify: Checkout has to collect a payment method.
     if (!current.providerSubscriptionId) throw new BillingError("Start a checkout to move onto a paid plan.");
@@ -109,7 +109,7 @@ export function createStripeProvider<P extends string, T extends BasePlan<P>>(
         return { kind: "applied", subscription: await changePlan(ctx, input) };
       }
 
-      const price = priceIdFor(stripe.config(), input.plan, input.interval);
+      const price = priceIdFor(stripe.config(), input.plan, input.interval, input.priceVariant);
       if (!price) throw new BillingError("That plan isn't available for purchase right now.");
       const seats = clampSeats(input.seats);
       const customer = await ensureCustomer(env, ctx);
@@ -138,7 +138,9 @@ export function createStripeProvider<P extends string, T extends BasePlan<P>>(
             ...(rt.checkoutBranding && { branding_settings: stripeBrandingSettings(rt.checkoutBranding) }),
           },
           // A double click within Stripe's idempotency window reuses the session.
-          { idempotencyKey: `checkout:${rt.app}:${ctx.orgId}:${input.plan}:${input.interval}:${seats}` },
+          {
+            idempotencyKey: `checkout:${rt.app}:${ctx.orgId}:${input.plan}:${input.interval}:${input.priceVariant ?? ""}:${seats}`,
+          },
         ),
       );
       if (!session.url) throw new BillingError("Stripe didn't return a checkout page. Try again.");

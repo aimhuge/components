@@ -13,6 +13,9 @@
  *   STRIPE_WEBHOOK_SECRET           whsec_… for THIS app's endpoint
  *   STRIPE_PRICE_<PLAN>_<INTERVAL>  one per paid plan × monthly/yearly,
  *                                   e.g. STRIPE_PRICE_PRO_MONTHLY
+ *   STRIPE_PRICE_<PLAN>_<INTERVAL>_<VARIANT>
+ *                                   optional, one per `priceVariants` entry,
+ *                                   e.g. STRIPE_PRICE_PRO_MONTHLY_REGIONAL_LOW
  */
 import Stripe from "stripe";
 import { type BasePlan, type BillingInterval } from "../../catalog.js";
@@ -30,7 +33,7 @@ export interface StripeConfig<P extends string = string> extends PriceLookup<P> 
     webhookSecret: string;
     siteOrigin: string;
 }
-export declare function priceEnvName(plan: string, interval: BillingInterval): string;
+export declare function priceEnvName(plan: string, interval: BillingInterval, variant?: string): string;
 /** Test-mode keys move no real money; the UI must say so exactly as it does
  *  for the mock. A live-looking page backed by test keys is the worst state. */
 export declare function isTestKey(secretKey: string): boolean;

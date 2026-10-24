@@ -59,15 +59,25 @@ export function toSubscriptionStatus(status: Stripe.Subscription.Status): Subscr
  *  Paid plans only — a free plan is never sold, so it has no price. */
 export interface PriceLookup<P extends string = string> {
   prices: Partial<Record<P, Record<BillingInterval, string>>>;
+  /** Other prices for the same plan (regional pricing): plan → interval →
+   *  variant → price id. Only the variants that have a price set. */
+  variants?: Partial<Record<P, Partial<Record<BillingInterval, Record<string, string>>>>>;
 }
 
-/** (plan, interval) → Stripe price id, or null for a plan Stripe doesn't sell. */
+/**
+ * (plan, interval, variant?) → Stripe price id, or null for a plan Stripe
+ * doesn't sell. A variant without its own price sells the plan's own, so a
+ * region nobody has priced yet still checks out at full price.
+ */
 export function priceIdFor<P extends string>(
   config: PriceLookup<P>,
   plan: P,
   interval: BillingInterval,
+  variant?: string,
 ): string | null {
-  return config.prices[plan]?.[interval] || null;
+  const own = config.prices[plan]?.[interval] || null;
+  if (!own || !variant) return own;
+  return config.variants?.[plan]?.[interval]?.[variant] || own;
 }
 
 /**
@@ -86,6 +96,13 @@ export function planForPriceId<P extends string>(
   for (const plan of Object.keys(config.prices) as P[]) {
     for (const interval of BILLING_INTERVALS) {
       if (config.prices[plan]?.[interval] === priceId) return { plan, interval };
+    }
+  }
+  // A variant price is still its plan: a regional Pro subscriber is on Pro.
+  for (const plan of Object.keys(config.variants ?? {}) as P[]) {
+    for (const interval of BILLING_INTERVALS) {
+      const byVariant = config.variants?.[plan]?.[interval] ?? {};
+      if (Object.values(byVariant).includes(priceId)) return { plan, interval };
     }
   }
   return null;

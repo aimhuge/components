@@ -33,9 +33,16 @@ export declare function toSubscriptionStatus(status: Stripe.Subscription.Status)
  *  Paid plans only — a free plan is never sold, so it has no price. */
 export interface PriceLookup<P extends string = string> {
     prices: Partial<Record<P, Record<BillingInterval, string>>>;
+    /** Other prices for the same plan (regional pricing): plan → interval →
+     *  variant → price id. Only the variants that have a price set. */
+    variants?: Partial<Record<P, Partial<Record<BillingInterval, Record<string, string>>>>>;
 }
-/** (plan, interval) → Stripe price id, or null for a plan Stripe doesn't sell. */
-export declare function priceIdFor<P extends string>(config: PriceLookup<P>, plan: P, interval: BillingInterval): string | null;
+/**
+ * (plan, interval, variant?) → Stripe price id, or null for a plan Stripe
+ * doesn't sell. A variant without its own price sells the plan's own, so a
+ * region nobody has priced yet still checks out at full price.
+ */
+export declare function priceIdFor<P extends string>(config: PriceLookup<P>, plan: P, interval: BillingInterval, variant?: string): string | null;
 /**
  * Stripe price id → (plan, interval).
  *

@@ -33,6 +33,9 @@ export interface ChangePlanInput<P extends string> {
   plan: P;
   interval: BillingInterval;
   seats: number;
+  /** Sell one of the app's `priceVariants` (a regional price) instead of the
+   *  plan's own. Same plan either way. The mock ignores it. */
+  priceVariant?: string;
 }
 
 export interface CheckoutInput<P extends string> extends ChangePlanInput<P> {

@@ -104,6 +104,45 @@ describe("price ↔ plan mapping", () => {
   });
 });
 
+describe("price variants", () => {
+  const REGIONAL: PriceLookup<"free" | "pro" | "team"> = {
+    ...CONFIG,
+    variants: { pro: { monthly: { regional_low: "price_pro_m_low" } } },
+  };
+
+  it("sells the variant's price when it has one", () => {
+    expect(priceIdFor(REGIONAL, "pro", "monthly", "regional_low")).toBe("price_pro_m_low");
+  });
+
+  it("falls back to the plan's own price for an unpriced variant", () => {
+    expect(priceIdFor(REGIONAL, "pro", "monthly", "regional_lower_middle")).toBe("price_pro_m");
+    expect(priceIdFor(REGIONAL, "pro", "yearly", "regional_low")).toBe("price_pro_y");
+    expect(priceIdFor(CONFIG, "team", "monthly", "regional_low")).toBe("price_team_m");
+  });
+
+  it("never sells free, variant or not", () => {
+    expect(priceIdFor(REGIONAL, "free", "monthly", "regional_low")).toBeNull();
+  });
+
+  it("maps a variant price back to its plan", () => {
+    expect(planForPriceId(REGIONAL, "price_pro_m_low")).toEqual({ plan: "pro", interval: "monthly" });
+    const regional = subscription({
+      items: {
+        data: [
+          {
+            id: "si_123",
+            quantity: 1,
+            current_period_start: 1_754_006_400,
+            current_period_end: 1_756_684_800,
+            price: { id: "price_pro_m_low", unit_amount: 500, currency: "usd" },
+          },
+        ],
+      },
+    });
+    expect(readSubscription(REGIONAL, regional)).toMatchObject({ plan: "pro", interval: "monthly", unitAmountCents: 500 });
+  });
+});
+
 describe("readSubscription", () => {
   it("reads the billing period off the ITEM, not the subscription", () => {
     // The regression this guards: in API 2025-03-31+ the period moved onto the

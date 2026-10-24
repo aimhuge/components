@@ -58,6 +58,14 @@ export interface BillingConfig<P extends string, T extends BasePlan<P>> {
   checkoutBranding?: CheckoutBranding;
   /** Environment source. Default `process.env`. Tests pass their own. */
   env?: Record<string, string | undefined>;
+  /**
+   * Extra Stripe prices for the SAME plan — regional pricing, say
+   * `["regional_low"]`. Each reads an optional `STRIPE_PRICE_<PLAN>_<INTERVAL>_<VARIANT>`;
+   * checkout passes `priceVariant` to sell one, and the webhook maps it back
+   * to its plan. A variant with no price set falls back to the plan's own.
+   * Default: none.
+   */
+  priceVariants?: readonly string[];
 }
 
 export interface Runtime<P extends string = string, T extends BasePlan<P> = BasePlan<P>> {
@@ -70,6 +78,7 @@ export interface Runtime<P extends string = string, T extends BasePlan<P> = Base
   readonly env: Record<string, string | undefined>;
   readonly providerId: BillingProviderId;
   readonly checkoutBranding: CheckoutBranding | undefined;
+  readonly priceVariants: readonly string[];
   mockCheckoutPath(orgSlug: string): string;
   siteOrigin(): string;
   notifyPlanChange(event: PlanChangeEvent<P>): Promise<void>;
@@ -104,6 +113,7 @@ export function createRuntime<P extends string, T extends BasePlan<P>>(
     // no money. Selecting Stripe with missing config throws at first use.
     providerId: configured === "stripe" ? "stripe" : "mock",
     checkoutBranding: config.checkoutBranding,
+    priceVariants: config.priceVariants ?? [],
     mockCheckoutPath: config.mockCheckoutPath ?? ((slug) => `/${slug}/billing/checkout`),
     siteOrigin: () =>
       (config.siteOrigin ?? env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, ""),

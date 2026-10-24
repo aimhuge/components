@@ -13,6 +13,9 @@
  *   STRIPE_WEBHOOK_SECRET           whsec_… for THIS app's endpoint
  *   STRIPE_PRICE_<PLAN>_<INTERVAL>  one per paid plan × monthly/yearly,
  *                                   e.g. STRIPE_PRICE_PRO_MONTHLY
+ *   STRIPE_PRICE_<PLAN>_<INTERVAL>_<VARIANT>
+ *                                   optional, one per `priceVariants` entry,
+ *                                   e.g. STRIPE_PRICE_PRO_MONTHLY_REGIONAL_LOW
  */
 import Stripe from "stripe";
 import { BILLING_INTERVALS, type BasePlan, type BillingInterval } from "../../catalog.js";
@@ -33,8 +36,11 @@ export interface StripeConfig<P extends string = string> extends PriceLookup<P> 
   siteOrigin: string;
 }
 
-export function priceEnvName(plan: string, interval: BillingInterval): string {
-  return `STRIPE_PRICE_${plan.toUpperCase().replace(/[^A-Z0-9]/g, "_")}_${interval.toUpperCase()}`;
+const envPart = (value: string) => value.toUpperCase().replace(/[^A-Z0-9]/g, "_");
+
+export function priceEnvName(plan: string, interval: BillingInterval, variant?: string): string {
+  const base = `STRIPE_PRICE_${envPart(plan)}_${interval.toUpperCase()}`;
+  return variant ? `${base}_${envPart(variant)}` : base;
 }
 
 /** Test-mode keys move no real money; the UI must say so exactly as it does
@@ -63,6 +69,19 @@ export function readStripeConfig<P extends string, T extends BasePlan<P>>(rt: Ru
     for (const interval of BILLING_INTERVALS) byInterval[interval] = need(priceEnvName(plan, interval));
     prices[plan] = byInterval;
   }
+  // Variant prices are optional: an unset one sells the plan's own price, so
+  // they never join the missing list.
+  const variants: NonNullable<PriceLookup<P>["variants"]> = {};
+  for (const plan of rt.catalog.paid) {
+    for (const interval of BILLING_INTERVALS) {
+      for (const variant of rt.priceVariants) {
+        const value = (rt.env[priceEnvName(plan, interval, variant)] ?? "").trim();
+        if (!value) continue;
+        const byInterval = (variants[plan] ??= {});
+        (byInterval[interval] ??= {})[variant] = value;
+      }
+    }
+  }
 
   if (missing.length > 0) {
     throw new Error(
@@ -74,7 +93,7 @@ export function readStripeConfig<P extends string, T extends BasePlan<P>>(rt: Ru
   if (secretKey.startsWith("pk_")) {
     throw new Error("STRIPE_SECRET_KEY holds a publishable key (pk_…). It needs the secret key (sk_… or rk_…).");
   }
-  return { secretKey, webhookSecret, prices, siteOrigin: rt.siteOrigin() };
+  return { secretKey, webhookSecret, prices, variants, siteOrigin: rt.siteOrigin() };
 }
 
 export interface StripeHandle<P extends string = string> {

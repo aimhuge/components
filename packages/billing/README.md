@@ -106,11 +106,20 @@ export const POST = (req: Request) => billing.handleStripeWebhook(req, getSupaba
 | `STRIPE_SECRET_KEY` | `sk_test_…` / `sk_live_…` |
 | `STRIPE_WEBHOOK_SECRET` | `whsec_…` of THIS app's endpoint |
 | `STRIPE_PRICE_<PLAN>_<INTERVAL>` | One per paid plan × `MONTHLY`/`YEARLY`, e.g. `STRIPE_PRICE_PRO_MONTHLY` |
+| `STRIPE_PRICE_<PLAN>_<INTERVAL>_<VARIANT>` | Optional, per `priceVariants` entry, e.g. `STRIPE_PRICE_PRO_MONTHLY_REGIONAL_LOW` |
 | `NEXT_PUBLIC_SITE_URL` | Origin for Checkout and portal return URLs |
 
 A missing variable throws on first use with the whole list. Create the Stripe
 prices to MATCH the catalog (per-unit recurring prices, seats ride on
 `quantity`). Nothing reconciles them, so a mismatch is a real bug.
+
+**Price variants** sell the same plan at another Stripe price, for regional
+pricing. Pass `priceVariants: ["regional_low"]` to `createBilling`, then
+`priceVariant: "regional_low"` in `startCheckout` / `changePlan`. A variant's
+price is optional and never in the missing list: with none set, the plan's own
+price is sold. The webhook maps a variant price back to its plan, so a regional
+Pro subscriber is on `pro`. The mock ignores `priceVariant`. The catalog still
+holds the plan's full price only; the variant's amount lives in Stripe.
 
 ## What `billing` gives an app
 

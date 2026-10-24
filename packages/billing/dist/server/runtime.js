@@ -25,6 +25,7 @@ export function createRuntime(config) {
         // no money. Selecting Stripe with missing config throws at first use.
         providerId: configured === "stripe" ? "stripe" : "mock",
         checkoutBranding: config.checkoutBranding,
+        priceVariants: config.priceVariants ?? [],
         mockCheckoutPath: config.mockCheckoutPath ?? ((slug) => `/${slug}/billing/checkout`),
         siteOrigin: () => (config.siteOrigin ?? env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, ""),
         async notifyPlanChange(event) {

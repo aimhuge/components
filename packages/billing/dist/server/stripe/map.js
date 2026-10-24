@@ -38,9 +38,16 @@ export function toSubscriptionStatus(status) {
             return "incomplete";
     }
 }
-/** (plan, interval) → Stripe price id, or null for a plan Stripe doesn't sell. */
-export function priceIdFor(config, plan, interval) {
-    return config.prices[plan]?.[interval] || null;
+/**
+ * (plan, interval, variant?) → Stripe price id, or null for a plan Stripe
+ * doesn't sell. A variant without its own price sells the plan's own, so a
+ * region nobody has priced yet still checks out at full price.
+ */
+export function priceIdFor(config, plan, interval, variant) {
+    const own = config.prices[plan]?.[interval] || null;
+    if (!own || !variant)
+        return own;
+    return config.variants?.[plan]?.[interval]?.[variant] || own;
 }
 /**
  * Stripe price id → (plan, interval).
@@ -56,6 +63,14 @@ export function planForPriceId(config, priceId) {
     for (const plan of Object.keys(config.prices)) {
         for (const interval of BILLING_INTERVALS) {
             if (config.prices[plan]?.[interval] === priceId)
+                return { plan, interval };
+        }
+    }
+    // A variant price is still its plan: a regional Pro subscriber is on Pro.
+    for (const plan of Object.keys(config.variants ?? {})) {
+        for (const interval of BILLING_INTERVALS) {
+            const byVariant = config.variants?.[plan]?.[interval] ?? {};
+            if (Object.values(byVariant).includes(priceId))
                 return { plan, interval };
         }
     }
