@@ -12,6 +12,7 @@ per-package READMEs are the deep reference, and this page doesn't restate them.
 | `@aimhuge/slack` | Web API client | [packages/slack/README.md](packages/slack/README.md) |
 | `@aimhuge/share` | Pure types + utilities, UI over them, a small server entry | [packages/share/README.md](packages/share/README.md) |
 | `@aimhuge/admin` | UI chrome over `@aimhuge/teams` (see [the exception](#1-peerdependencies-only)) | [packages/admin/README.md](packages/admin/README.md) |
+| `@aimhuge/sheet` | Pure types + utilities, UI over them, a `sheet.css` with app-mapped colours | [packages/sheet/README.md](packages/sheet/README.md) |
 
 ## The five patterns
 
@@ -182,11 +183,11 @@ Apps import only what `exports` lists. There are no deep imports into `dist/`.
 | Subpath | Holds | Who has it |
 |---|---|---|
 | `.` | Pure, client-safe | all |
-| `./client` | `"use client"` components and hooks | auth, teams, admin |
+| `./client` | `"use client"` components and hooks | auth, teams, admin, share, sheet |
 | `./server` | `import "server-only"`, I/O | all |
 | `./roles`, `./columns`, `./test-cards` | A narrower pure slice | teams, admin, billing |
 | `./sql/*` | Raw SQL files to copy | billing, slack |
-| `./auth.css` | Tokens + Tailwind `@source` | auth |
+| `./auth.css`, `./share.css`, `./sheet.css` | Tokens + Tailwind `@source` | auth, share, sheet |
 
 Apps that render a package's components in vitest must inline it:
 `test.server.deps.inline: [/@aimhuge\//]` (every README's Gotchas/Install).

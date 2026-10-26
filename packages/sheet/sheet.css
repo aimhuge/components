@@ -1,0 +1,284 @@
+/*
+ * @aimhuge/sheet — the look of a sheet: a table on frosted glass with grid lines across and down, a numbered
+ * gutter, a header that stays put, bands, and the floating menus.
+ *
+ * Import once from the app's global stylesheet, after Tailwind:
+ *
+ *   @import "tailwindcss";
+ *   @import "@aimhuge/sheet/sheet.css";
+ *
+ * That one line points Tailwind at the package's compiled components (Tailwind never scans node_modules on its
+ * own) and defines the sheet-* colours they use. The defaults are a dark surface; an app sets the --sheet-*
+ * variables on :root to its own palette (Weft maps them to its theme tokens, so every theme follows):
+ *
+ *   --sheet-ink          cell text and headings
+ *   --sheet-muted        secondary text, counts
+ *   --sheet-faint        header labels, placeholders, the gutter
+ *   --sheet-line         the grid lines
+ *   --sheet-line-strong  the glass edge, the header and band rules
+ *   --sheet-panel        the glass
+ *   --sheet-sunken       the gutter, bands, hovers
+ *   --sheet-danger       an error line
+ *   --sheet-accent       sorted and filtered headers, ticks, the menu edge
+ *   --sheet-accent-soft  the highlighted menu row
+ *
+ * The accent buttons (bg-accent, text-accent) come from the app's own theme, as in @aimhuge/share. A sheet sets
+ * its columns' widths in --sheet-cols on its grid (SheetTable does it from its widths prop).
+ */
+
+@source "./dist";
+
+:where(:root) {
+  --sheet-ink: #e8e6e1;
+  --sheet-muted: #a19f98;
+  --sheet-faint: #706e68;
+  --sheet-line: rgb(255 255 255 / 0.08);
+  --sheet-line-strong: rgb(255 255 255 / 0.16);
+  --sheet-panel: #1b1b19;
+  --sheet-sunken: #181816;
+  --sheet-danger: #f87171;
+  --sheet-accent: #6ea0f5;
+  --sheet-accent-soft: rgb(110 160 245 / 0.14);
+}
+
+@theme inline {
+  --color-sheet-ink: var(--sheet-ink);
+  --color-sheet-muted: var(--sheet-muted);
+  --color-sheet-faint: var(--sheet-faint);
+  --color-sheet-sunken: var(--sheet-sunken);
+  --color-sheet-danger: var(--sheet-danger);
+  --color-sheet-accent-soft: var(--sheet-accent-soft);
+}
+
+/* A sheet's grid: the header row and every row share it, so a column's name always sits over its cells. Cells
+   stretch to the row's full height so their borders meet the row lines. */
+.sheet-grid {
+  display: grid;
+  grid-template-columns: var(--sheet-cols);
+  align-items: stretch;
+  column-gap: 0;
+  min-height: 34px;
+}
+
+/* Every cell — the header's and the row's — truncates rather than spilling into the next column,
+   so a long name or a narrow sheet never lets two columns run into each other. */
+.sheet-grid > * {
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  border-right: 1px solid var(--sheet-line);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A cell's own content shrinks with it, so its inner text still truncates. */
+.sheet-grid > * > * {
+  min-width: 0;
+}
+
+/* The glass the sheet sits on: frosted, nearly opaque, so the theme's picture shows as a glow
+   behind it and never under the text. */
+.sheet-glass {
+  border: 1px solid var(--sheet-line-strong);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--sheet-panel) 86%, transparent);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  box-shadow:
+    0 24px 60px -24px rgb(0 0 0 / 0.6),
+    inset 0 1px 0 rgb(255 255 255 / 0.06);
+}
+
+/* The header row: solid enough that rows scroll out of sight under it, with a faint accent edge. */
+.sheet-head-row {
+  background: color-mix(in srgb, var(--sheet-panel) 97%, transparent);
+  border-bottom: 1px solid var(--sheet-line-strong);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--sheet-accent) 30%, transparent);
+}
+
+.sheet-head {
+  min-height: 30px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--sheet-faint);
+}
+
+/* A column band (Backlog, Review…): stuck just under the header, its height matching the header's
+   30px and its border. */
+.sheet-band {
+  top: 31px;
+  height: 30px;
+  background: color-mix(in srgb, var(--sheet-sunken) 92%, transparent);
+  border-bottom: 1px solid var(--sheet-line-strong);
+}
+
+.sheet-row {
+  border-bottom: 1px solid var(--sheet-line);
+}
+
+/* The numbered gutter down the left, like a spreadsheet's row numbers. */
+.sheet-gutter {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  border-right: 1px solid var(--sheet-line-strong);
+  background: color-mix(in srgb, var(--sheet-sunken) 55%, transparent);
+  color: var(--sheet-faint);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Beyond the grid: the floating menus, their ticks, and the hover cues that say what can be clicked. */
+
+/* A floating menu: frosted glass like the sheet but nearly solid, since it sits over rows of text, with a
+   soft accent rim. */
+.sheet-pop {
+  border: 1px solid var(--sheet-line-strong);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--sheet-panel) 97%, transparent);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  box-shadow:
+    0 18px 48px -12px rgb(0 0 0 / 0.6),
+    0 0 0 1px color-mix(in srgb, var(--sheet-accent) 14%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 0.06);
+  animation: sheet-pop-in 120ms ease-out;
+}
+
+@keyframes sheet-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+.sheet-pop-search {
+  border-bottom: 1px solid var(--sheet-line);
+  background: color-mix(in srgb, var(--sheet-sunken) 50%, transparent);
+}
+
+.sheet-pop-search:focus-within {
+  box-shadow: inset 0 -1px 0 var(--sheet-accent);
+}
+
+.sheet-pop-foot {
+  border-top: 1px solid var(--sheet-line);
+}
+
+/* A value's tick in a filter menu: a rounded square that fills with the accent and a check when on. */
+.sheet-tick {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--sheet-line-strong);
+  border-radius: 4px;
+}
+
+.sheet-tick-on {
+  border-color: var(--sheet-accent);
+  background: var(--sheet-accent);
+}
+
+.sheet-tick-on::after {
+  content: "";
+  width: 7px;
+  height: 4px;
+  margin-top: -2px;
+  border-bottom: 1.5px solid white;
+  border-left: 1.5px solid white;
+  transform: rotate(-45deg);
+}
+
+/* A header open on its menu, and what a filtered header says it's filtered to. */
+.sheet-head-open {
+  background: color-mix(in srgb, var(--sheet-accent) 10%, transparent);
+  box-shadow: inset 0 -2px 0 var(--sheet-accent);
+}
+
+.sheet-head-note {
+  padding: 0 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--sheet-accent) 16%, transparent);
+  font-size: 10px;
+  font-weight: 500;
+}
+
+/* The title opens the thread, so it reads as a link under the pointer. */
+.sheet-title {
+  cursor: pointer;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+.sheet-title:hover {
+  text-decoration-line: underline;
+  text-decoration-color: color-mix(in srgb, var(--sheet-accent) 70%, transparent);
+}
+
+/* A cell that opens a menu of its own (the folder) underlines too, in the faint ink. */
+.sheet-link {
+  text-align: left;
+  text-underline-offset: 3px;
+}
+
+.sheet-link:hover {
+  color: var(--sheet-ink);
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+}
+
+.sheet-status-cell > button:hover {
+  filter: brightness(1.2);
+}
+
+/* Space waiting for its second key: a pill at the foot of the sheet says what it can be. */
+.sheet-leader {
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  z-index: 30;
+  padding: 6px 14px;
+  border: 1px solid color-mix(in srgb, var(--sheet-accent) 40%, var(--sheet-line-strong));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--sheet-panel) 96%, transparent);
+  box-shadow: 0 10px 30px -10px rgb(0 0 0 / 0.6);
+  color: var(--sheet-muted);
+  font-size: 12px;
+  transform: translateX(-50%);
+}
+
+.sheet-leader kbd {
+  padding: 0 5px;
+  border: 1px solid var(--sheet-line-strong);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  color: var(--sheet-ink);
+  font-size: 11px;
+}
+
+/* A SheetTable's row lights under the pointer, and its first column's title underlines, since a click opens it. */
+.sheet-table-row:hover {
+  background: var(--sheet-sunken);
+}
+
+.sheet-table-row:hover .sheet-title {
+  text-decoration-line: underline;
+  text-decoration-color: color-mix(in srgb, var(--sheet-accent) 70%, transparent);
+}
+
+/* A SheetTable's cells get room above and below, for a two-line cell such as a name over an email. */
+.sheet-table-row .sheet-grid {
+  min-height: 42px;
+}
+
+.sheet-table-row .sheet-grid > * {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
