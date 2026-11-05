@@ -252,3 +252,38 @@ export function neonService(db) {
 export function asSupabase(service) {
     return service;
 }
+/**
+ * Make a Supabase-targeted migration (e.g. `@aimhuge/billing/sql/0001_billing.sql`)
+ * runnable on Neon: drops foreign keys into `auth.users` (Neon has no such
+ * schema; the column stays) and grants to Supabase's `service_role`. RLS lines
+ * are kept: on Neon the connection owns the tables, so they bypass RLS anyway.
+ */
+export function supabaseSqlForNeon(sql) {
+    return sql
+        .replace(/\s+references\s+auth\.users\s*\([^)]*\)(\s+on\s+delete\s+(cascade|set\s+null|restrict|no\s+action))?/gi, "")
+        .replace(/^\s*grant\b[^;]*\bto\s+service_role\s*;\s*$/gim, "")
+        .replace(/^\s*revoke\b[^;]*\bfrom\s+(anon|authenticated|public)\b[^;]*;\s*$/gim, "");
+}
+/**
+ * Split a migration into statements for drivers that run one at a time
+ * (neon's HTTP query). Keeps $$-quoted function bodies whole; drops comments.
+ */
+export function splitSql(sql) {
+    const out = [];
+    let cur = "";
+    let inDollar = false;
+    for (const line of sql.split("\n")) {
+        const code = inDollar ? line : line.replace(/--.*$/, "");
+        if ((code.match(/\$\$/g) ?? []).length % 2 === 1)
+            inDollar = !inDollar;
+        cur += code + "\n";
+        if (!inDollar && /;\s*$/.test(code)) {
+            if (cur.trim() !== ";")
+                out.push(cur.trim().replace(/;$/, ""));
+            cur = "";
+        }
+    }
+    if (cur.trim())
+        out.push(cur.trim());
+    return out.filter(Boolean);
+}

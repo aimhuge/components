@@ -108,4 +108,16 @@ export declare function neonService(db: Queryable): NeonService;
  * like all of supabase-js, so TypeScript can't prove it structurally.
  */
 export declare function asSupabase<T>(service: NeonService): T;
+/**
+ * Make a Supabase-targeted migration (e.g. `@aimhuge/billing/sql/0001_billing.sql`)
+ * runnable on Neon: drops foreign keys into `auth.users` (Neon has no such
+ * schema; the column stays) and grants to Supabase's `service_role`. RLS lines
+ * are kept: on Neon the connection owns the tables, so they bypass RLS anyway.
+ */
+export declare function supabaseSqlForNeon(sql: string): string;
+/**
+ * Split a migration into statements for drivers that run one at a time
+ * (neon's HTTP query). Keeps $$-quoted function bodies whole; drops comments.
+ */
+export declare function splitSql(sql: string): string[];
 export {};
