@@ -1,0 +1,33 @@
+{
+  "name": "@aimhuge/neon",
+  "version": "0.10.0",
+  "description": "A Supabase-shaped service client over Neon Postgres: the query-builder subset the @aimhuge packages call (from/select/eq/insert/upsert/update/delete/maybeSingle/rpc…), compiled to parameterised SQL, so @aimhuge/billing and friends run on Neon.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./sql/*": "./sql/*"
+  },
+  "files": [
+    "dist",
+    "sql",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "@neondatabase/serverless": ">=1.0.0"
+  },
+  "devDependencies": {
+    "@neondatabase/serverless": "^1.1.0",
+    "@types/node": "^26.6.4",
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.11"
+  }
+}

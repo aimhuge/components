@@ -121,6 +121,21 @@ importers:
         specifier: ^4.1.11
         version: 4.1.11(@types/node@26.6.4)(jsdom@30.1.1)(vite@8.3.2(@types/node@26.6.4))
 
+  packages/neon:
+    devDependencies:
+      '@neondatabase/serverless':
+        specifier: ^1.1.0
+        version: 1.2.0
+      '@types/node':
+        specifier: ^26.6.4
+        version: 26.6.4
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.11
+        version: 4.1.11(@types/node@26.6.4)(jsdom@30.1.1)(vite@8.3.2(@types/node@26.6.4))
+
   packages/share:
     devDependencies:
       '@testing-library/react':
@@ -488,6 +503,10 @@ packages:
 
   '@jridgewell/sourcemap-codec@1.6.0':
     resolution: {integrity: sha512-T7jf+5zgsZHwNJ4lvQ7/aezbyk0nNX+zJVWpmHA7VYsEx7a7qr5Rg5IbtJFqkgze5Y2sruq1RUY8Q837Od7iFw==}
+
+  '@neondatabase/serverless@1.2.0':
+    resolution: {integrity: sha512-tnaqgixUengZQNd9ZrS3ytQfamJzLKY8QxgqWQTNHHtB+KrFQWk77JTbbpg4RD+J3qE4eO2lVytvGDX5Kj6FdQ==}
+    engines: {node: '>=19.0.0'}
 
   '@next/env@16.3.6':
     resolution: {integrity: sha512-x9Vblze1EbtltQYnNH38xCPWU3TVfBd1eXqA3+w9+BTpedkkdNpAaltXlGQ/nsc1+E0mVTNrtcbX3GoO09zeLQ==}
@@ -1494,6 +1513,8 @@ snapshots:
     optional: true
 
   '@jridgewell/sourcemap-codec@1.6.0': {}
+
+  '@neondatabase/serverless@1.2.0': {}
 
   '@next/env@16.3.6': {}
 
