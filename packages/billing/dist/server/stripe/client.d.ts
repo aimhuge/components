@@ -24,7 +24,7 @@ import type { PriceLookup } from "./map.js";
  * silently becomes "renews Invalid Date" if assumed otherwise. An SDK upgrade
  * should be a deliberate migration with a diff to read.
  */
-export declare const STRIPE_API_VERSION = "2026-07-29.dahlia";
+export declare const STRIPE_API_VERSION = "2026-10-28.endive";
 export interface StripeConfig<P extends string = string> extends PriceLookup<P> {
     secretKey: string;
     webhookSecret: string;

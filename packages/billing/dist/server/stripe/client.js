@@ -22,7 +22,7 @@ import { BILLING_INTERVALS } from "../../catalog.js";
  * silently becomes "renews Invalid Date" if assumed otherwise. An SDK upgrade
  * should be a deliberate migration with a diff to read.
  */
-export const STRIPE_API_VERSION = "2026-07-29.dahlia";
+export const STRIPE_API_VERSION = "2026-10-28.endive";
 export function priceEnvName(plan, interval) {
     return `STRIPE_PRICE_${plan.toUpperCase().replace(/[^A-Z0-9]/g, "_")}_${interval.toUpperCase()}`;
 }
